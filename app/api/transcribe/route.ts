@@ -1,8 +1,7 @@
 import { OpenAI } from "openai";
 
-// Initialize with Groq's endpoint
 const groq = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY, // Add your gsk_ key to .env
+  apiKey: process.env.GROQ_API_KEY,
   baseURL: "https://api.groq.com/openai/v1",
 });
 
@@ -15,14 +14,15 @@ export async function POST(req: Request) {
       return Response.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Using Groq's Whisper Large V3 (Free & Fast)
     const transcription = await groq.audio.transcriptions.create({
       file: file,
       model: "whisper-large-v3",
       response_format: "verbose_json",
+      // ADD THESE TWO LINES:
+      language: "si", // Use "si" for Sinhala, "ta" for Tamil, or leave blank for auto
+      prompt: "This audio contains Sinhala, English, and Tamil speech.", // Helps with code-switching
     });
 
-    // Format into (0:00) text...
     const formattedText = transcription.segments?.map(segment => {
       const timestamp = Math.floor(segment.start);
       const minutes = Math.floor(timestamp / 60);
